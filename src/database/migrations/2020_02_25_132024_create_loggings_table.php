@@ -18,9 +18,9 @@ class CreateLoggingsTable extends Migration
             $table->string('action');
             $table->string('method')->nullable();
             $table->ipAddress('ip');
-            $table->string('city');
+            $table->string('city')->nullable();
             $table->string('country')->nullable();
-            $table->string('type');
+            $table->string('type', 4);
             $table->text('data');
         });
     }
