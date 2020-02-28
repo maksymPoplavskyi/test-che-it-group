@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Jobs\LoggingJob;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,36 +20,23 @@ class Logging
     {
         $response = $next($request);
 
-        if ($request->getMethod() == "POST" || $request->getMethod() == "GET") {
+        $action = $request->getRequestUri();
 
-            $method = Route::currentRouteAction();
-
-            if ($method) {
-                $method = explode('@', $method);
-                $method = str_replace('App\Http\Controllers\\', '', $method[0]);
-            } else {
-                $method = null;
-            }
-
-            $ip = $request->getClientIp();
-            $accessKey = config('config.key');
-
-            $ch = curl_init("http://api.ipstack.com/$ip?access_key=$accessKey");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $json = curl_exec($ch);
-            curl_close($ch);
-            $api_result = json_decode($json, true);
-
-            \App\Models\Logging::insert([
-                'action' => $request->getRequestUri(),
-                'method' => $method,
-                'ip' => $ip,
-                'city' => $api_result['city'] ? $api_result['city'] : null,
-                'country' => $api_result['country_code'] ? $api_result['country_code'] : null,
-                'type' => $request->getMethod(),
-                'data' => json_encode($request->input())
-            ]);
+        $method = Route::currentRouteAction();
+        if ($method) {
+            $method = explode('@', $method);
+            $method = str_replace('App\Http\Controllers\\', '', $method[0]);
+        } else {
+            $method = null;
         }
+
+        $ip = $request->getClientIp();
+
+        $type = $request->getMethod();
+
+        $data = json_encode($request->input());
+
+        LoggingJob::dispatch($action, $method, $ip, $type, $data);
 
         return $response;
     }
