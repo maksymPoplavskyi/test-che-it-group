@@ -70,6 +70,16 @@ services:
     networks:
       - internal
 
+  redis:
+    container_name: redis
+    domainname: redis
+    hostname: redis
+    image: bitnami/redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - internal
+
 networks:
   internal:
     driver: bridge

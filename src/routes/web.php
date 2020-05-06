@@ -11,6 +11,10 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+use App\Http\Controllers\LoggingController;
+use Illuminate\Support\Facades\Route;
+
+    Route::get('/', [LoggingController::class, 'index']);
+    Route::post('/create', [LoggingController::class, 'create']);
+    Route::patch('/update/{id}', [LoggingController::class, 'update']);
+    Route::delete('/delete/{id}',[LoggingController::class, 'delete']);
